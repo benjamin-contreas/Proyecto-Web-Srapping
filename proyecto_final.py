@@ -93,7 +93,6 @@ def printProducto(producto):
 if (__name__ == '__main__'):
 
     # 1: Encontrar el valor de la UF
-    print("Toma pene chancha")
     # Driver y carga de página
     driver = iniciarDriver()
     driver.get('https://www.bcentral.cl')
@@ -114,10 +113,12 @@ if (__name__ == '__main__'):
 
     # 2: Lectura del paquete de datos (patrones de búsqueda)
     patronesBusqueda = listaBusqueda("patrones_busqueda.txt")
+
+    # Lista de resultados
+    listResult = []
+
     # 2.1 Falabella
     for S_FIND in patronesBusqueda:
-        # Lista de resultados
-        listResult = []
 
         if (B_VERBOSE_DEBUG):
             print('=' * len('Patrón de búsqueda: {}'.format(S_FIND)))
@@ -135,30 +136,39 @@ if (__name__ == '__main__'):
             btnAccept = driver.find_element(By.XPATH, sXpath)
             btnAccept.click()
         except:
+            print('No hay ventana emergente')
             pass
 
         inputText = driver.find_element(By.XPATH, '/html/body/div[1]/header/div[1]/div/div[3]/div/div/input')
         inputText.send_keys(S_FIND)
         inputText.send_keys(Keys.ENTER)
-        mySleep(1)
+        mySleep(3)
 
         # Verificar si hay datos
         bOkExistData = False
         try:
-            sXpath = '/html/body/div[1]/div/div[2]/div[2]/section[2]/div/div[3]'
+            sXpath = '/html/body/div[1]/div/div[2]/div[2]/section[2]/div/div[3]' 
             btnPage1 = driver.find_element(By.XPATH, sXpath)
             bOkExistData = True
             print('Hay datos')
-        except:
-            if (B_VERBOSE_DEBUG):
-                print('No hay datos')   
-            pass
+        except: 
+            try:
+                sXpath = '/html/body/div[1]/div/div/div[2]/section[2]/div/div[3]' 
+                btnPage1 = driver.find_element(By.XPATH, sXpath)
+                bOkExistData = True
+                print('Hay datos')
+            except:
+                if (B_VERBOSE_DEBUG):
+                    print('No hay datos')   
+                pass
         
-        # Revisemos la primera página
         if (bOkExistData):
             try:
                 mySleep(2)
-                sXpath = '/html/body/div[1]/div/div[2]/div[2]/section[2]/div/div[3]'
+                if (S_FIND == 'impresora 3d'):
+                    sXpath = '/html/body/div[1]/div/div/div[2]/section[2]/div/div[3]' 
+                else:
+                    sXpath = '/html/body/div[1]/div/div[2]/div[2]/section[2]/div/div[3]'
                 contentData = driver.find_element(By.XPATH, sXpath)
                 htmlData = contentData.get_attribute('innerHTML')
                 lxmlData = BeautifulSoup(htmlData, 'lxml')
@@ -178,12 +188,18 @@ if (__name__ == '__main__'):
                 # Esperamos a que termine de cargar 
                 # Luego de carga inicial para primera pasada
                 # O luego de páginación para siguientes pasadas
-                sXpath = '/html/body/div[1]/div/div[2]/div[2]/section[2]/div/div[3]'
+                if (S_FIND == 'impresora 3d'):
+                    sXpath = '/html/body/div[1]/div/div/div[2]/section[2]/div/div[3]'
+                else:
+                    sXpath = '/html/body/div[1]/div/div[2]/div[2]/section[2]/div/div[3]'
                 mySleepUntilObject(20, driver, sXpath)
                 mySleep(4)
 
                 # Capturamos HTML del contenedor de productos tecnológicos
-                sXpath = '/html/body/div[1]/div/div[2]/div[2]/section[2]/div/div[3]'
+                if (S_FIND == 'impresora 3d'):
+                    sXpath = '/html/body/div[1]/div/div/div[2]/section[2]/div/div[3]'
+                else:
+                    sXpath = '/html/body/div[1]/div/div[2]/div[2]/section[2]/div/div[3]'
                 contentData = driver.find_element(By.XPATH, sXpath)
                 htmlData = contentData.get_attribute('innerHTML')
                 lxmlData = BeautifulSoup(htmlData, 'lxml')
@@ -192,13 +208,14 @@ if (__name__ == '__main__'):
                 # Generamos HTML
                 # outputHtml('falabella_{}_{}.html'.format(S_FIND, nPage), lxmlData)
             
-                
                 # Determinamos el tipo de contenedor
                 # 0: No reconocido
                 # 1: Multiples productos por línea
                 # 2: Un producto por línea
                 nContentType = 0
-                sNames = lxmlData.find_all('div', class_= 'jsx-1833870204 jsx-3831830274 pod-details pod-details-4_GRID has-stickers')
+                if (nPage == 1):
+                    sNames = lxmlData.find_all('div', class_= 'jsx-1833870204 jsx-3831830274 pod-details pod-details-4_GRID has-stickers')
+
                 if len(sNames) > 0:
                     nContentType = 1
                 else:
@@ -230,6 +247,7 @@ if (__name__ == '__main__'):
                         listResult.append(miProducto)
                     else: # elif (nContentType == 2):
                         nPrecio = sPrices[i].ol.li.div.span.string.replace('$', '').replace(' ', '').replace('.', '')
+                        nPrecio = nPrecio.split("-")[0]
                         precioUF = float(nPrecio) / ufHoy.precio
                         miProducto = producto.Producto(S_FIND, "Falabella" ,sNames[i].string, int(nPrecio), precioUF)
                         listResult.append(miProducto)
@@ -252,12 +270,15 @@ if (__name__ == '__main__'):
                 # Dar click a la siguiente página
                 try:
                     # Obtenemos botón próxima página, sino se caerá y será capturado en except
-                    sXpath = '//*[@id="testId-pagination-bottom-arrow-right"]/i'
+                    if (nPage == 1):
+                        sXpath = '/html/body/div[1]/div/div/div[2]/section[2]/div/div[1]/div/div[2]/div/div/button'
+                    else:
+                        sXpath = '/html/body/div[1]/div/div/div[2]/section[2]/div/div[1]/div/div[2]/div/div[2]/button'
                     contentData = driver.find_element(By.XPATH, sXpath)
                     
                     # Intentamos click por espera para próxima página
                     driver.execute_script('window.scrollTo(0, document.body.scrollHeight);')
-                    bOkExistData = clickWithWait(2, driver, sXpath)
+                    bOkExistData = clickWithWait(4, driver, sXpath)
 
                     # Si retorna en False es porque existe el botón siguiente pero no quedó clickleable
                     if not (bOkExistData):
@@ -269,7 +290,7 @@ if (__name__ == '__main__'):
                         driver.get(driver.current_url)
 
                         # Intentamos NUEVAMENTE click por espera para próxima página
-                        bOkExistData = clickWithWait(2, driver, sXpath)
+                        bOkExistData = clickWithWait(4, driver, sXpath)
                         if not (bOkExistData):
                             if (B_VERBOSE_DEBUG):
                                 print('No se logró hacer click a la siguiente página')  
@@ -283,7 +304,8 @@ if (__name__ == '__main__'):
                     print('Caída al capturar contenedor')
                     #print('ClassError: {} - NameError: {}'.format(sys.exc_info()[0], sys.exc_info()[1]))
                 bOkExistData = False
- 
+
+            # Incrementamos página
             nPage = nPage + 1
     
     # Cierre del driver
@@ -296,8 +318,10 @@ if (__name__ == '__main__'):
         print('Lista total:')       
         print('=' * len('Lista total:'))
         #print(*listResult, sep='\n')
-        [print('"{}";"{}";{}'.format(item.patronBusqueda, item.descripcion, item.precio)) for item in listResult]
+        [print('"{}";"{}";{}'.format(item.patronBusqueda, item.descripcion, item.precioPesos)) for item in listResult]
     
     # Proceso finalizado
     if (B_VERBOSE_DEBUG):
         print('Proceso finalizado')
+
+    
