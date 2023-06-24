@@ -1,0 +1,4 @@
+1. Eliminar pop up inicial (Full xPath: /html/body/div[4]/div[2]/div/div[1])
+2. Clickear en la barra de busqueda. (Full xPath: /html/body/div[1]/header/div[1]/div/div[3]/div/div/input)
+3. Ingresar producto a buscar.
+4. Clickear en el boton de busqueda. (Full xPath: /html/body/div[1]/header/div[1]/div/div[3]/div/button)
