@@ -93,7 +93,7 @@ def printProducto(producto):
 if (__name__ == '__main__'):
 
     # 1: Encontrar el valor de la UF
-
+    print("Toma pene chancha")
     # Driver y carga de página
     driver = iniciarDriver()
     driver.get('https://www.bcentral.cl')
