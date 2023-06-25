@@ -210,11 +210,56 @@ if (__name__ == '__main__'):
                     if (B_VERBOSE_DEBUG):
                         printProducto(miProducto)
                 
+                # Dar click a la siguiente página
+                # Obtenemos botón próxima página, sino se caerá y será capturado en except
+                if (S_FIND == 'notebook hp'):
+                    link_element = driver.find_element(By.XPATH, '/html/body/div[9]/div[2]/div/div[2]/div[4]/nav/ul/li[5]/a')
+                    link_url = link_element.get_attribute('href')
+                    if link_url == 'https://simple.ripley.cl/tecno/computacion/notebooks?facet=Marca%3AHP&page=3&s=mdco#':
+                        print('No hay más páginas')
+                        bOkExistData = False      
+                    driver.get(link_url)              
+                if (S_FIND == 'impresora 3d'):
+                    link_element = driver.find_element(By.XPATH,'/html/body/div[9]/div[2]/div/div[2]/div[4]/nav/ul/li[13]/a')
+                    link_url = link_element.get_attribute('href')
+                    if link_url == '#':
+                        print('No hay más páginas')
+                        bOkExistData = False
+                    driver.get(link_url)
+                    # contentData = driver.find_element(By.XPATH, sXpath)
+                    
+                #     # Intentamos click por espera para próxima página
+                #     # driver.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+                #     bOkExistData = clickWithWait(4, driver, sXpath)
+
+                #     # Si retorna en False es porque existe el botón siguiente pero no quedó clickleable
+                #     if not (bOkExistData):
+                #         if (B_VERBOSE_DEBUG):
+                #             print('Reintento con scroll fin + F5')
+                        
+                #         # Hacemos scroll hasta el final y luego F5 para refrescar
+                #         driver.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+                #         driver.get(driver.current_url)
+
+                #         # Intentamos NUEVAMENTE click por espera para próxima página
+                #         bOkExistData = clickWithWait(4, driver, sXpath)
+                #         if not (bOkExistData):
+                #             if (B_VERBOSE_DEBUG):
+                #                 print('No se logró hacer click a la siguiente página')  
+                # except:
+                #     if (B_VERBOSE_DEBUG):
+                #         print('No hay más páginas de información')
+                #         #print('ClassError: {} - NameError: {}'.format(sys.exc_info()[0], sys.exc_info()[1]))
+                #     bOkExistData = False          
+                
             except:
                 if (B_VERBOSE_DEBUG):
                     print('Caída al capturar contenedor')
                     #print('ClassError: {} - NameError: {}'.format(sys.exc_info()[0], sys.exc_info()[1]))
                 bOkExistData = False
+
+            # Incrementamos página
+            nPage = nPage + 1
 
     # Cierre del driver
     driver.close()
