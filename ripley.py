@@ -215,6 +215,7 @@ if (__name__ == '__main__'):
                 if (S_FIND == 'notebook hp'):
                     link_element = driver.find_element(By.XPATH, '/html/body/div[9]/div[2]/div/div[2]/div[4]/nav/ul/li[5]/a')
                     link_url = link_element.get_attribute('href')
+                    # Aplicar esta solución al resto de los casos.
                     if link_url == 'https://simple.ripley.cl/tecno/computacion/notebooks?facet=Marca%3AHP&page=3&s=mdco#':
                         print('No hay más páginas')
                         bOkExistData = False      
