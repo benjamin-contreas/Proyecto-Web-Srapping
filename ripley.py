@@ -5,12 +5,13 @@ from selenium import webdriver                          # Para realizar web scra
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+import csv                                              # Para exportar a CSV
 import uf
 import producto
 
 # Constantes
-B_VERBOSE_DEBUG = True                                  # Para debug
-B_VERBOSE_RESULT = True                                # Para mostrar resultados de capturas de datos
+B_VERBOSE_DEBUG = False                                 # Para debug
+B_VERBOSE_RESULT = False                               # Para mostrar resultados de capturas de datos
 
 # Generar archivo HTML de salida
 def outputHtml(sFile, lxmlData):
@@ -103,6 +104,14 @@ def menorPrecio(sPrices):
         return int(precio_normal[0].text.replace('$', '').replace('.', ''))
     else:
         return None  # Return None if no prices are found
+    
+def resultadosCsv(listaResultados, nombresColumnas, filename):
+  with open(filename, 'w', newline='') as csvfile:
+    writer = csv.writer(csvfile, delimiter=',')
+    writer.writerow(nombresColumnas)
+    for objeto in listaResultados:
+      fila = [getattr(objeto, columna) for columna in nombresColumnas]
+      writer.writerow(fila)
 
 
 
@@ -216,17 +225,23 @@ if (__name__ == '__main__'):
                     link_element = driver.find_element(By.XPATH, '/html/body/div[9]/div[2]/div/div[2]/div[4]/nav/ul/li[5]/a')
                     link_url = link_element.get_attribute('href')
                     # Aplicar esta solución al resto de los casos.
-                    if link_url == 'https://simple.ripley.cl/tecno/computacion/notebooks?facet=Marca%3AHP&page=3&s=mdco#':
+                    if link_url == driver.current_url + "#":
                         print('No hay más páginas')
                         bOkExistData = False      
                     driver.get(link_url)              
                 if (S_FIND == 'impresora 3d'):
                     link_element = driver.find_element(By.XPATH,'/html/body/div[9]/div[2]/div/div[2]/div[4]/nav/ul/li[13]/a')
                     link_url = link_element.get_attribute('href')
-                    if link_url == '#':
+                    if link_url == driver.current_url + "#":
                         print('No hay más páginas')
                         bOkExistData = False
                     driver.get(link_url)
+                if (S_FIND == 'tablet samsung'):
+                    link_element = driver.find_element(By.XPATH,'/html/body/div[9]/div[2]/div/div[2]/div[4]/nav/ul/li[3]/a')
+                    link_url = link_element.get_attribute('href')
+                    if link_url == driver.current_url + "#":
+                        print('No hay más páginas')
+                        bOkExistData = False
                     # contentData = driver.find_element(By.XPATH, sXpath)
                     
                 #     # Intentamos click por espera para próxima página
@@ -265,6 +280,9 @@ if (__name__ == '__main__'):
     # Cierre del driver
     driver.close()
     driver.quit()
+
+    # 3: Exportar a CSV
+    resultadosCsv(listResult, ['patronBusqueda', 'multitienda', 'descripcion', 'precioPesos', 'precioUf'], 'todosolo.csv')
 
     # Imprimir capturas de datos
     if (B_VERBOSE_RESULT):
