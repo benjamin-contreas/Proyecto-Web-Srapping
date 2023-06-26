@@ -127,7 +127,7 @@ def lxmlParse(sXpath):
     lxmlData = BeautifulSoup(htmlData, 'lxml')
     return lxmlData
 
-#Función para leer csv uando open csv
+#Función para leer csv usando open csv
 def lectura_csv(archivo_csv):
   resultado = []
   with open(archivo_csv, "r") as archivo_csv:
@@ -387,21 +387,6 @@ if (__name__ == '__main__'):
                 if (B_VERBOSE_DEBUG):
                     print('No hay datos')   
                 pass
-        
-        if (bOkExistData):
-            try:
-                # Capturamos HTML del contenedor de productos tecnológicos
-                mySleep(2)
-                if (S_FIND == 'impresora 3d'):
-                    sXpath = '/html/body/div[1]/div/div/div[2]/section[2]/div/div[3]' 
-                else:
-                    sXpath = '/html/body/div[1]/div/div[2]/div[2]/section[2]/div/div[3]'
-                
-                lmxlData = lxmlParse(sXpath)
-                outputHtml('falabella.html', lxmlData)
-            
-            except:
-                print("No hay mas paginas")
 
         # Iterar en todas las páginas
         nPage = 1
@@ -426,21 +411,19 @@ if (__name__ == '__main__'):
                     sXpath = '/html/body/div[1]/div/div/div[2]/section[2]/div/div[3]'
                 else:
                     sXpath = '/html/body/div[1]/div/div[2]/div[2]/section[2]/div/div[3]'
-                contentData = driver.find_element(By.XPATH, sXpath)
-                htmlData = contentData.get_attribute('innerHTML')
-                lxmlData = BeautifulSoup(htmlData, 'lxml')
+
+                lmxlData = lxmlParse(sXpath)
                 
                 
                 # Generamos HTML
-                # outputHtml('falabella_{}_{}.html'.format(S_FIND, nPage), lxmlData)
+                outputHtml('falabella_{}_{}.html'.format(S_FIND, nPage), lxmlData)
             
                 # Determinamos el tipo de contenedor
                 # 0: No reconocido
                 # 1: Multiples productos por línea
                 # 2: Un producto por línea
                 nContentType = 0
-                if (nPage == 1):
-                    sNames = lxmlData.find_all('div', class_= 'jsx-1833870204 jsx-3831830274 pod-details pod-details-4_GRID has-stickers')
+                sNames = lxmlData.find_all('div', class_= 'jsx-1833870204 jsx-3831830274 pod-details pod-details-4_GRID has-stickers')
 
                 if len(sNames) > 0:
                     nContentType = 1
@@ -458,9 +441,9 @@ if (__name__ == '__main__'):
                 if (nContentType == 1):
                     sNames = lxmlData.find_all('div', class_= 'jsx-1833870204 jsx-3831830274 pod-details pod-details-4_GRID has-stickers')
                     sPrices = lxmlData.find_all('a', class_= 'jsx-1833870204 jsx-3831830274 pod-summary pod-link pod-summary-4_GRID')
-                else: # elif (nContentType == 2):
+                elif (nContentType == 2):
                     sNames = lxmlData.find_all('b', class_= 'jsx-1576191951 title2 primary jsx-2889528833 bold pod-subTitle subTitle-rebrand')
-                    sPrices = lxmlData.find_all('div', class_= 'jsx-2112733514 prices prices-4_GRID')     
+                    sPrices = lxmlData.find_all('div', class_= 'jsx-2112733514 prices prices-4_GRID') 
 
                 # Recorremos el contenedor para llenar lista
                 for i in range(len(sNames)):
@@ -580,17 +563,6 @@ if (__name__ == '__main__'):
             print('No hay datos')
             pass
 
-        if (bOkExistData):
-            try:
-                mySleep(2)
-                sXpath = '/html/body/div[9]/div[2]/div/div[2]/div[3]/section/div/div' 
-                contentData = driver.find_element(By.XPATH, sXpath)
-                htmlData = contentData.get_attribute('innerHTML')
-                lxmlData = BeautifulSoup(htmlData, 'lxml')
-                outputHtml('ripley.html', lxmlData)
-            except:
-                print("No hay mas paginas")
-
         # Iterar en todas las páginas
         nPage = 1
         while (bOkExistData):
@@ -608,9 +580,7 @@ if (__name__ == '__main__'):
 
                 # Capturamos HTML del contenedor de productos tecnológicos
                 sXpath = '/html/body/div[9]/div[2]/div/div[2]/div[3]/section/div/div'
-                contentData = driver.find_element(By.XPATH, sXpath)
-                htmlData = contentData.get_attribute('innerHTML')
-                lxmlData = BeautifulSoup(htmlData, 'lxml')
+                lmxlData = lxmlParse(sXpath)
 
                 # Capturamos datos del contenedor
                 sNames = lxmlData.find_all('div', class_= 'catalog-product-details__name')
